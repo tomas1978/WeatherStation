@@ -13,7 +13,7 @@ temperatures=[] #Create an empty list for storing the temperatures
 
 adc = machine.ADC()             #Create an ADC object
 apin = adc.channel(pin='P16');  #Create an analog pin on P16 & connect TMP36
-for i in range(1,20):
+for i in range(1,10):
     print("")
     print("Reading TMP36 sensor...")
     value = apin()
@@ -31,4 +31,4 @@ for i in range(1,20):
 
     pybytes.send_signal(1,temp)
     pybytes.send_signal(2,averageTemp)
-    time.sleep(10)
+    time.sleep(60)
