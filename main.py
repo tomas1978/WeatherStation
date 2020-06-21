@@ -2,6 +2,7 @@
 import time
 import machine
 
+
 def calcAverageTemp(values):
   average = 0
   for i in range(0,len(values)):
@@ -13,7 +14,11 @@ temperatures=[] #Create an empty list for storing the temperatures
 
 adc = machine.ADC()             #Create an ADC object
 apin = adc.channel(pin='P16');  #Create an analog pin on P16 & connect TMP36
-for i in range(1,10):
+for i in range(1,2):
+    from machine import Pin
+    blueLED = Pin('P17', mode = Pin.OUT)
+    blueLED.value(1);
+
     print("")
     print("Reading TMP36 sensor...")
     value = apin()
@@ -31,4 +36,7 @@ for i in range(1,10):
 
     pybytes.send_signal(1,temp)
     pybytes.send_signal(2,averageTemp)
+    blueLED.value(1)
+    time.sleep(0.2)
+    blueLED.value(0)
     time.sleep(60)
