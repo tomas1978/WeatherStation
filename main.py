@@ -10,15 +10,22 @@ def calcAverageTemp(values):
     print(values[i])
   return average/len(values);
 
+def blinkLED(myLED, blinktime):
+    myLED.value(1)
+    time.sleep(blinktime)
+    myLED.value(0)
+    time.sleep(blinktime)
+
 temperatures=[] #Create an empty list for storing the temperatures
+
+#Create a Pin object for the blue LED
+from machine import Pin
+blueLED = Pin('P9', mode = Pin.OUT)
 
 adc = machine.ADC()             #Create an ADC object
 apin = adc.channel(pin='P16');  #Create an analog pin on P16 & connect TMP36
-for i in range(1,2):
-    from machine import Pin
-    blueLED = Pin('P17', mode = Pin.OUT)
-    blueLED.value(1);
 
+for i in range(1,20):
     print("")
     print("Reading TMP36 sensor...")
     value = apin()
@@ -34,9 +41,13 @@ for i in range(1,2):
 
     print("Average temp = %5.1f C" % (averageTemp))
 
-    pybytes.send_signal(1,temp)
-    pybytes.send_signal(2,averageTemp)
-    blueLED.value(1)
-    time.sleep(0.2)
-    blueLED.value(0)
-    time.sleep(60)
+    pybytes.send_signal(1,round(temp,1))
+    pybytes.send_signal(2,round(averageTemp,1))
+
+    blinkLED(blueLED,0.5)
+    #blueLED.value(1)
+    #time.sleep(0.5)
+    #blueLED.value(0)
+    #time.sleep(0.5)
+
+    time.sleep(10)
