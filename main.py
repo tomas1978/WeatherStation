@@ -41,13 +41,9 @@ for i in range(1,20):
 
     print("Average temp = %5.1f C" % (averageTemp))
 
-    pybytes.send_signal(1,round(temp,1))
+    pybytes.send_signal(1,int(temp))
     pybytes.send_signal(2,round(averageTemp,1))
 
     blinkLED(blueLED,0.5)
-    #blueLED.value(1)
-    #time.sleep(0.5)
-    #blueLED.value(0)
-    #time.sleep(0.5)
 
     time.sleep(10)
