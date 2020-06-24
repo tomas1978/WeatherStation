@@ -1,7 +1,7 @@
 # Measuring temperature by TMP36
 import time
 import machine
-
+import pycom
 
 def calcAverageTemp(values):
   average = 0
@@ -16,6 +16,14 @@ def blinkLED(myLED, blinktime):
     myLED.value(0)
     time.sleep(blinktime)
 
+def RGBTemperature(temp):
+    if temp<20:
+        pycom.rgbled(0x0000FF)  # Blue
+    elif temp>25:
+        pycom.rgbled(0xFF0000)  # Red
+    else:
+        pycom.rgbled(0x00FF00)  # Green
+
 temperatures=[] #Create an empty list for storing the temperatures
 
 #Create a Pin object for the blue LED
@@ -24,6 +32,8 @@ blueLED = Pin('P9', mode = Pin.OUT)
 
 adc = machine.ADC()             #Create an ADC object
 apin = adc.channel(pin='P16');  #Create an analog pin on P16 & connect TMP36
+
+pycom.heartbeat(False)
 
 for i in range(1,20):
     print("")
@@ -36,6 +46,8 @@ for i in range(1,20):
     temp -= 2.3  #Testing to calibrate temperature
     temperatures.append(temp)
     print("Temperature = %5.1f C" % (temp))
+
+    RGBTemperature(temp)
 
     averageTemp = calcAverageTemp(temperatures)
 
