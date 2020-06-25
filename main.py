@@ -1,7 +1,10 @@
-# Measuring temperature by TMP36
+# Measuring barometric pressure and temperature using av BMP180 sensor
 import time
 import machine
 import pycom
+from machine import I2C
+from bmp085 import BMP180
+from machine import Pin
 
 def calcAverageTemp(values):
   average = 0
@@ -27,35 +30,33 @@ def RGBTemperature(temp):
 temperatures=[] #Create an empty list for storing the temperatures
 
 #Create a Pin object for the blue LED
-from machine import Pin
-blueLED = Pin('P9', mode = Pin.OUT)
+blueLED = Pin('P8', mode = Pin.OUT)
 
-adc = machine.ADC()             #Create an ADC object
-apin = adc.channel(pin='P16');  #Create an analog pin on P16 & connect TMP36
+#Set up i2c protocol for the BMP180 sensor
+i2c = I2C(0)                         # create on bus 0
+i2c = I2C(0, I2C.MASTER)             # create and init as a master
+i2c = I2C(0, pins=('P9','P10'))      # PIN assignments (P9=SDA, P10=SCL)
+i2c.init(I2C.MASTER, baudrate=115200) # init as a master
+bmp = BMP180(i2c)
 
 pycom.heartbeat(False)
 
-for i in range(1,20):
-    print("")
-    print("Reading TMP36 sensor...")
-    value = apin()
-    print("ADC count = %d" %(value))
-
-    #LoPy has 1.1 V input range for adc
-    temp = ((value * 1100 ) / 4096 - 500) / 10
-    temp -= 2.3  #Testing to calibrate temperature
+for i in range(1,10):
+    temp=bmp.temperature    #Read temperature from BMP180
     temperatures.append(temp)
-    print("Temperature = %5.1f C" % (temp))
-
-    RGBTemperature(temp)
-
+    pressure=bmp.pressure   #Read pressure from BMP180
     averageTemp = calcAverageTemp(temperatures)
 
+    RGBTemperature(temp)    #Set color of RGB diode according to temperature
+
+    print('Temperature = ', temp)
+    print('Pressure = ', bmp.pressure)
     print("Average temp = %5.1f C" % (averageTemp))
 
-    pybytes.send_signal(1,int(temp))
-    pybytes.send_signal(2,round(averageTemp,1))
-
+    #pybytes.send_signal(1,int(temp))
+    pybytes.send_signal(1,temp)
+    pybytes.send_signal(2,pressure)
     blinkLED(blueLED,0.5)
+    time.sleep(60)
 
-    time.sleep(10)
+pycom.rgbled(0x000000)  #Set RGB LED to black
