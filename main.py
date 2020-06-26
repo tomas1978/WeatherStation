@@ -41,13 +41,17 @@ bmp = BMP180(i2c)
 
 pycom.heartbeat(False)
 
-for i in range(1,10):
+for i in range(1,100):
     temp=bmp.temperature    #Read temperature from BMP180
     temperatures.append(temp)
     pressure=bmp.pressure   #Read pressure from BMP180
+    if(i==1):
+        previousPressure=0
+    else:
+        previousPressure=pressure
     averageTemp = calcAverageTemp(temperatures)
 
-    RGBTemperature(temp)    #Set color of RGB diode according to temperature
+    #RGBTemperature(temp)    #Set color of RGB diode according to temperature
 
     print('Temperature = ', temp)
     print('Pressure = ', bmp.pressure)
@@ -56,7 +60,12 @@ for i in range(1,10):
     #pybytes.send_signal(1,int(temp))
     pybytes.send_signal(1,temp)
     pybytes.send_signal(2,pressure)
+    rateOfPressureChange=pressure-previousPressure
+    if(i>1):
+        print('Pressure change = ', rateOfPressureChange)
+        pybytes.send_signal(3,rateOfPressureChange)
+
     blinkLED(blueLED,0.5)
-    time.sleep(60)
+    time.sleep(3600)
 
 pycom.rgbled(0x000000)  #Set RGB LED to black
