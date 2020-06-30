@@ -6,12 +6,8 @@ from machine import I2C
 from bmp085 import BMP180
 from machine import Pin
 
-def calcAverageTemp(values):
-  average = 0
-  for i in range(0,len(values)):
-    average += values[i]
-    print(values[i])
-  return average/len(values);
+def calcAverage(values):
+  return sum(values)/len(values);
 
 def blinkLED(myLED, blinktime):
     myLED.value(1)
@@ -41,31 +37,27 @@ bmp = BMP180(i2c)
 
 pycom.heartbeat(False)
 
-for i in range(1,100):
+for i in range(1,1000):
     temp=bmp.temperature    #Read temperature from BMP180
     temperatures.append(temp)
     pressure=bmp.pressure   #Read pressure from BMP180
-    if(i==1):
-        previousPressure=0
-    else:
-        previousPressure=pressure
-    averageTemp = calcAverageTemp(temperatures)
 
     #RGBTemperature(temp)    #Set color of RGB diode according to temperature
 
     print('Temperature = ', temp)
-    print('Pressure = ', bmp.pressure)
-    print("Average temp = %5.1f C" % (averageTemp))
+    print('Pressure = ', pressure)
 
-    #pybytes.send_signal(1,int(temp))
     pybytes.send_signal(1,temp)
-    pybytes.send_signal(2,pressure)
-    rateOfPressureChange=pressure-previousPressure
-    if(i>1):
-        print('Pressure change = ', rateOfPressureChange)
-        pybytes.send_signal(3,rateOfPressureChange)
-
+    pybytes.send_signal(2,round(pressure,2))
+    if(i%24==0):
+        pybytes.send_signal(3,round(min(temperatures),2))
+        pybytes.send_signal(4,round(max(temperatures),2))
+        pybytes.send_signal(5,round(calcAverage(temperatures),2))
+        temperatures=[]     #Clear the temperature list
     blinkLED(blueLED,0.5)
+
+    #The time until next iteration in the loop. For example, time.sleep(3600)
+    #makes the Pycom read from the BMP180 and send data once every hour.
     time.sleep(3600)
 
 pycom.rgbled(0x000000)  #Set RGB LED to black
